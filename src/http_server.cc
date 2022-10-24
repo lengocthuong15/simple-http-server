@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <sys/epoll.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -98,13 +99,18 @@ void HttpServer::Listen() {
   // accept new connections and distribute tasks to worker threads
   fd_set rfds;
   struct timeval tv;
+  struct pollfd pfds[1];
   while (running_) {
-    FD_ZERO(&rfds);
-    FD_SET(sock_fd_, &rfds);
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-    int retval = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
-    if (retval && FD_ISSET(sock_fd_, &rfds)) {
+    // FD_ZERO(&rfds);
+    // FD_SET(sock_fd_, &rfds);
+    // tv.tv_sec = 5;
+    // tv.tv_usec = 0;
+    // int retval = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+    // if (retval && FD_ISSET(sock_fd_, &rfds)) {
+      pfds[0].fd = sock_fd_;
+      pfds[0].events = POLLIN;
+      poll(pfds, 1, 5);
+      if (pfds[0].revents & POLLIN) {
       client_fd = accept4(sock_fd_, (sockaddr *)&client_address, &client_len,
                         SOCK_NONBLOCK);
       if (client_fd < 0) continue;
@@ -228,7 +234,7 @@ void HttpServer::HandleHttpData(const EventData &raw_request,
   // Set response to write to client
   response_string =
       to_string(http_response, http_request.method() != HttpMethod::HEAD);
-  memcpy(raw_response->buffer, response_string.c_str(), kMaxBufferSize);
+  memcpy(raw_response->buffer, response_string.c_str(),  response_string.length());
   raw_response->length = response_string.length();
 }
 
