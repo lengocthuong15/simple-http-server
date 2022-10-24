@@ -10,6 +10,7 @@
 #include "http_message.h"
 #include "http_server.h"
 #include "uri.h"
+#include <storage.h>
 
 using simple_http_server::HttpMethod;
 using simple_http_server::HttpRequest;
@@ -43,21 +44,25 @@ int main(void) {
   int port = 8080;
   HttpServer server(host, port);
 
+  Storage *storage = new Storage();
+
   // Register a few endpoints for demo and benchmarking
-  auto say_hello = [](const HttpRequest& request) -> HttpResponse {
+  auto say_hello = [&](const HttpRequest& request) -> HttpResponse {
     HttpResponse response(HttpStatusCode::Ok);
     response.SetHeader("Content-Type", "text/plain");
     response.SetContent("Hello, world\n");
     return response;
   };
-  auto send_html = [](const HttpRequest& request) -> HttpResponse {
+  auto send_html = [&](const HttpRequest& request) -> HttpResponse {
     HttpResponse response(HttpStatusCode::Ok);
+    std::string path = request.uri().path();
     std::string content;
-    content += "<!doctype html>\n";
-    content += "<html>\n<body>\n\n";
-    content += "<h1>Hello, world in an Html page</h1>\n";
-    content += "<p>A Paragraph</p>\n\n";
-    content += "</body>\n</html>\n";
+    storage->getResource(path, content);    
+    // content += "<!doctype html>\n";
+    // content += "<html>\n<body>\n\n";
+    // content += "<h1>Hello, world in an Html page</h1>\n";
+    // content += "<p>A Paragraph</p>\n\n";
+    // content += "</body>\n</html>\n";
 
     response.SetHeader("Content-Type", "text/html");
     response.SetContent(content);
@@ -90,8 +95,10 @@ int main(void) {
     std::cout << "Server stopped" << std::endl;
   } catch (std::exception& e) {
     std::cerr << "An error occurred: " << e.what() << std::endl;
+    delete storage;
     return -1;
   }
 
+  delete storage;
   return 0;
 }
