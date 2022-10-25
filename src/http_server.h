@@ -18,6 +18,7 @@
 
 #include "http_message.h"
 #include "uri.h"
+#include <storage.h>
 
 namespace simple_http_server {
 
@@ -34,7 +35,7 @@ struct EventData {
 };
 
 // A request handler should expect a request as argument and returns a response
-using HttpRequestHandler_t = std::function<HttpResponse(const HttpRequest&)>;
+using HttpRequestHandler_t = std::function<HttpResponse(const HttpRequest&, Storage*)>;
 
 // The server consists of:
 // - 1 main thread
@@ -78,14 +79,18 @@ class HttpServer {
   int sock_fd_;
   std::atomic_bool running_;
   std::thread listener_thread_;
+  std::thread storage_watcher_;
   std::thread worker_threads_[kThreadPoolSize];
   int worker_epoll_fd_[kThreadPoolSize];
   epoll_event worker_events_[kThreadPoolSize][kMaxEvents];
   std::map<Uri, std::map<HttpMethod, HttpRequestHandler_t>> request_handlers_;
+  Storage *storage;
 
   void CreateSocket();
   void SetUpEpoll();
   void Listen();
+  void Watch_Storage();
+  void setStorage(Storage *inStorage);
   void ProcessEvents(int worker_id);
   void HandleEpollEvent(int epoll_fd, EventData* event, std::uint32_t events);
   void HandleHttpData(const EventData& request, EventData* response);

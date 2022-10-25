@@ -28,6 +28,7 @@ HttpServer::HttpServer(const std::string &host, std::uint16_t port)
       running_(false),
       worker_epoll_fd_() {
   CreateSocket();
+  storage = new Storage({"/index.html"});
 }
 
 void HttpServer::Start() {
@@ -57,12 +58,43 @@ void HttpServer::Start() {
   SetUpEpoll();
   running_ = true;
   listener_thread_ = std::thread(&HttpServer::Listen, this);
+  this->storage_watcher_ = std::thread(&HttpServer::Watch_Storage, this);
   for (int i = 0; i < kThreadPoolSize; i++) {
     worker_threads_[i] = std::thread(&HttpServer::ProcessEvents, this, i);
   }
+
+  auto say_hello = [](const HttpRequest& request, Storage *storage) -> HttpResponse {
+    HttpResponse response(HttpStatusCode::Ok);
+    response.SetHeader("Content-Type", "text/plain");
+    response.SetContent("Hello, world\n");
+    return response;
+  };
+  auto send_html = [](const HttpRequest& request, Storage *inStorage) -> HttpResponse {
+    HttpResponse response(HttpStatusCode::Ok);
+    std::string path = request.uri().path();
+    std::string content;
+    // std::cout << "File path = " << path << std::endl;
+    inStorage->getResource(path, content);
+    // content += "<!doctype html>\n";
+    // content += "<html>\n<body>\n\n";
+    // content += "<h1>Hello, world in an Html page</h1>\n";
+    // content += "<p>A Paragraph</p>\n\n";
+    // content += "</body>\n</html>\n";
+
+    response.SetHeader("Content-Type", "text/html");
+    response.SetContent(content);
+    return response;
+  };
+
+  // this->RegisterHttpRequestHandler("/", HttpMethod::GET, say_hello);
+  // this->RegisterHttpRequestHandler("/hello.html", HttpMethod::GET, send_html);
+  this->RegisterHttpRequestHandler("/index.html", HttpMethod::GET, send_html);
 }
 
 void HttpServer::Stop() {
+  if (storage) {
+    delete storage;
+  }
   running_ = false;
   listener_thread_.join();
   for (int i = 0; i < kThreadPoolSize; i++) {
@@ -86,6 +118,17 @@ void HttpServer::SetUpEpoll() {
       throw std::runtime_error(
           "Failed to create epoll file descriptor for worker");
     }
+  }
+}
+
+void HttpServer::setStorage(Storage *inStorage) {
+  this->storage = inStorage;
+}
+
+void HttpServer::Watch_Storage() {
+  while(1) {
+    sleep(5);
+    this->storage->updateResource();
   }
 }
 
@@ -247,7 +290,7 @@ HttpResponse HttpServer::HandleHttpRequest(const HttpRequest &request) {
   if (callback_it == it->second.end()) {  // no handler for this method
     return HttpResponse(HttpStatusCode::MethodNotAllowed);
   }
-  return callback_it->second(request);  // call handler to process the request
+  return callback_it->second(request, this->storage);  // call handler to process the request
 }
 
 void HttpServer::control_epoll_event(int epoll_fd, int op, int fd,
