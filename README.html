@@ -1,0 +1,9 @@
+<h2>System Overview</h2>
+<!-- <p dir="auto">The server program consists of:</p> -->
+<ul dir="auto">
+	<li>1 main thread for starting the server and for user interact</li>
+	<li>1 Listenser thread to accept incoming from clients and then propagte the request to the workers</li>
+	<li>N worker threads (by default, it is 5): those threads take the requests from the Listenser and process HTTP requests and then sends the responses back to client.</li>
+	<li>N worker threads (by default, it is 5): those threads take the requests from the Listenser and process HTTP requests and then sends the responses back to client.</li>
+	<li>Some utility functions to parse HTTP requests and repsonses.</li>
+</ul>
