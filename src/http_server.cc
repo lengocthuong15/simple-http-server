@@ -185,7 +185,7 @@ namespace simple_http_server
 
                 client_data = new EventData();
                 client_data->fd = client_fd;
-                control_epoll_event(worker_epoll_fd_[current_worker], EPOLL_CTL_ADD,
+                controlEpollEvent(worker_epoll_fd_[current_worker], EPOLL_CTL_ADD,
                                     client_fd, EPOLLIN, client_data);
                 current_worker++;
                 if (current_worker == HttpServer::kThreadPoolSize)
@@ -214,7 +214,7 @@ namespace simple_http_server
                 if ((current_event.events & EPOLLHUP) ||
                     (current_event.events & EPOLLERR))
                 {
-                    control_epoll_event(epoll_fd, EPOLL_CTL_DEL, data->fd);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_DEL, data->fd);
                     close(data->fd);
                     delete data;
                 }
@@ -225,7 +225,7 @@ namespace simple_http_server
                 }
                 else
                 { // something unexpected
-                    control_epoll_event(epoll_fd, EPOLL_CTL_DEL, data->fd);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_DEL, data->fd);
                     close(data->fd);
                     delete data;
                 }
@@ -248,12 +248,12 @@ namespace simple_http_server
                 response = new EventData();
                 response->fd = fd;
                 HandleHttpData(*request, response);
-                control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
+                controlEpollEvent(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
                 delete request;
             }
             else if (byte_count == 0)
             { // client has closed connection
-                control_epoll_event(epoll_fd, EPOLL_CTL_DEL, fd);
+                controlEpollEvent(epoll_fd, EPOLL_CTL_DEL, fd);
                 close(fd);
                 delete request;
             }
@@ -262,11 +262,11 @@ namespace simple_http_server
                 if (errno == EAGAIN || errno == EWOULDBLOCK)
                 { // retry
                     request->fd = fd;
-                    control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
                 }
                 else
                 { // other error
-                    control_epoll_event(epoll_fd, EPOLL_CTL_DEL, fd);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_DEL, fd);
                     close(fd);
                     delete request;
                 }
@@ -283,13 +283,13 @@ namespace simple_http_server
                 { // there are still bytes to write
                     response->cursor += byte_count;
                     response->length -= byte_count;
-                    control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLOUT, response);
                 }
                 else
                 { // we have written the complete message
                     request = new EventData();
                     request->fd = fd;
-                    control_epoll_event(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_MOD, fd, EPOLLIN, request);
                     delete response;
                 }
             }
@@ -297,11 +297,11 @@ namespace simple_http_server
             {
                 if (errno == EAGAIN || errno == EWOULDBLOCK)
                 { // retry
-                    control_epoll_event(epoll_fd, EPOLL_CTL_ADD, fd, EPOLLOUT, response);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_ADD, fd, EPOLLOUT, response);
                 }
                 else
                 { // other error
-                    control_epoll_event(epoll_fd, EPOLL_CTL_DEL, fd);
+                    controlEpollEvent(epoll_fd, EPOLL_CTL_DEL, fd);
                     close(fd);
                     delete response;
                 }
@@ -359,7 +359,7 @@ namespace simple_http_server
         return callback_it->second(request, this->storage); // call handler to process the request
     }
 
-    void HttpServer::control_epoll_event(int epoll_fd, int op, int fd,
+    void HttpServer::controlEpollEvent(int epoll_fd, int op, int fd,
                                          std::uint32_t events, void *data)
     {
         if (op == EPOLL_CTL_DEL)

@@ -101,7 +101,7 @@ namespace simple_http_server
         void HandleHttpData(const EventData &request, EventData *response);
         HttpResponse HandleHttpRequest(const HttpRequest &request);
 
-        void control_epoll_event(int epoll_fd, int op, int fd,
+        void controlEpollEvent(int epoll_fd, int op, int fd,
                                  std::uint32_t events = 0, void *data = nullptr);
     };
 
