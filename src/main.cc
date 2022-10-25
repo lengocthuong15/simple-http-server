@@ -18,28 +18,32 @@ using simple_http_server::HttpResponse;
 using simple_http_server::HttpServer;
 using simple_http_server::HttpStatusCode;
 
-int main(void) {
-  std::string host = "0.0.0.0";
-  int port = 8080;
-  HttpServer server(host, port);
+int main(void)
+{
+    std::string host = "0.0.0.0";
+    int port = 8080;
+    HttpServer server(host, port);
 
-  try {
+    try
+    {
 
-    std::cout << "Starting the web server.." << std::endl;
-    server.Start();
-    std::cout << "Server listening on " << host << ":" << port << std::endl;
+        std::cout << "Starting the web server.." << std::endl;
+        server.Start();
+        std::cout << "Server listening on " << host << ":" << port << std::endl;
 
-    std::cout << "Enter [q] to stop the server" << std::endl;
-    std::string command;
-    while (std::cin >> command, command != "q")
-      ;
-    std::cout << "'q' command entered. Stopping the web server.."
-              << std::endl;
-    server.Stop();
-    std::cout << "Server stopped" << std::endl;
-  } catch (std::exception& e) {
-    std::cerr << "An error occurred: " << e.what() << std::endl;
-    return -1;
-  }
-  return 0;
+        std::cout << "Enter [q] to stop the server" << std::endl;
+        std::string command;
+        while (std::cin >> command, command != "q")
+            ;
+        std::cout << "'q' command entered. Stopping the web server.."
+                  << std::endl;
+        server.Stop();
+        std::cout << "Server stopped" << std::endl;
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "An error occurred: " << e.what() << std::endl;
+        return -1;
+    }
+    return 0;
 }

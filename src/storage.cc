@@ -2,17 +2,19 @@
 #include <fstream>
 #include <iostream>
 
-Storage::Storage(const std::vector<std::string> &files): files(files){
+Storage::Storage(const std::vector<std::string> &files) : files(files)
+{
     this->baseDir = "/var/run/simplehttp";
     this->updateResource();
 };
 
-
-std::string Storage::processFilePath(const std::string &filePath) {
+std::string Storage::processFilePath(const std::string &filePath)
+{
     return this->baseDir + filePath;
 }
 
-void Storage::addFile(const std::string filePath) {
+void Storage::addFile(const std::string filePath)
+{
     this->files.push_back(filePath);
     std::string content = this->readFile(filePath);
     {
@@ -39,10 +41,13 @@ std::string Storage::readFile(const std::string &filePath)
     return std::string();
 }
 
-void Storage::updateResource() {
-    for (const auto filePath : files) {
+void Storage::updateResource()
+{
+    for (const auto filePath : files)
+    {
         std::string content = this->readFile(filePath);
-        if (content.length() != 0) {
+        if (content.length() != 0)
+        {
             std::unique_lock<std::shared_mutex> lock(mutex_);
             this->resources.erase(filePath);
             this->resources.emplace(filePath, content);
@@ -51,11 +56,13 @@ void Storage::updateResource() {
     }
 }
 
-bool Storage::getResource(const std::string &filePath, std::string  &outStr) {
+bool Storage::getResource(const std::string &filePath, std::string &outStr)
+{
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto it = this->resources.find(filePath);
-        if (it != this->resources.end()) {
+        if (it != this->resources.end())
+        {
             outStr = it->second;
             return true;
         }
