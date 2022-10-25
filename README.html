@@ -1,9 +1,55 @@
-<h2>System Overview</h2>
-<!-- <p dir="auto">The server program consists of:</p> -->
-<ul dir="auto">
+<h2>Features and Limitations</h2>
+<ul>
+	<li>Can handle at least 10k connections at the same time</li>
+	<li>Can serve more than 100k request per sec</li>
+	<li>Does no support for Multipart data</li>
+	<li>Support OS: Linux</li>
+	<li>Does not use any 3rd lib, just C++ standard and Linux sysem API </li>
+</ul>
+
+<h2>Architecture Overview</h2>
+
+<ul>
 	<li>1 main thread for starting the server and for user interact</li>
-	<li>1 Listenser thread to accept incoming from clients and then propagte the request to the workers</li>
-	<li>N worker threads (by default, it is 5): those threads take the requests from the Listenser and process HTTP requests and then sends the responses back to client.</li>
-	<li>N worker threads (by default, it is 5): those threads take the requests from the Listenser and process HTTP requests and then sends the responses back to client.</li>
-	<li>Some utility functions to parse HTTP requests and repsonses.</li>
+	<li>1 Listener thread to accept incoming from clients and then propagate the request to the workers</li>
+	<li>N worker threads (by default, it is 5): those threads take the requests from the Listener and process HTTP
+		requests, and then send the responses back to the client.</li>
+	<li>A component called Storage, this component will read files from the local dir, cache them, and serve it to
+		workers when needed</li>
+	<li>We also have a thread called Storage_Watcher for schedule update files content on time for Storage - every 5s
+	</li>
+	<li>The purpose of Storage and Storage_Watcher is to reduce the CPU process when dealing with local files. We will
+		provide the content as quick as possible and we also the content is updated</li>
+	<li>Some utility functions parse HTTP requests and responses</li>
+	<img src="out/overview.PNG" />
+</ul>
+
+<h2>Benchmark</h2>
+
+<blockquote style="background: #dbdbdb;
+width: 300px;
+border-radius: 5px;
+padding: 10px;">
+	<ul>
+		<li>Model: DELL</li>
+		<li>OS: Ubuntu 20.04 TLS x84_64</li>
+		<li>Kernel: 4.18.0-24-generic</li>
+		<li>CPU: Intel i7-8600 (8) @ 4.000 GHz</li>
+		<li>Memory: 8GB</li>
+	</ul>
+</blockquote>
+
+<h2>Future feature and Enhancement</h2>
+<ul>
+	<li>Add service watcher: we need a watcher server in order to recover and make the server run almost 99.99% of the
+		time</li>
+	<li>Dynamic configuration with config files</li>
+	<li>Storage_Watcher right now will automatically update the content of the files every 5s, this wait will slow down
+		the system if there are too many files to cache. <br>We need a new way that is more efficient, eg: inotify or
+		some 3rd lib</li>
+	<li>Use a service for replacing Storage. Storage right now needs a mutex to work in multithread, we can improve it
+		by using some 3rd party SW, like Redis for caching file contents</li>
+	<li>Add Logger: Logger is a critical feature for a SW, especially for a web server.</li>
+	<li>Support Multipart data</li>
+	<li>Bandwidth throttling or API rate limit
 </ul>
