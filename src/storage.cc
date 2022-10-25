@@ -2,9 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-Storage::Storage(const std::vector<std::string> &files) : files(files)
+Storage::Storage(const std::vector<std::string> &files) : files(files), baseDir("./")
 {
-    this->baseDir = "/var/run/simplehttp";
     this->updateResource();
 };
 
