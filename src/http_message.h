@@ -142,7 +142,7 @@ namespace simple_http_server
         Uri uri() const { return uri_; }
 
         friend std::string to_string(const HttpRequest &request);
-        friend HttpRequest string_to_request(const std::string &request_string);
+        friend HttpRequest stringToRequest(const std::string &request_string);
 
     private:
         HttpMethod method_;
@@ -164,7 +164,7 @@ namespace simple_http_server
         HttpStatusCode status_code() const { return status_code_; }
 
         friend std::string to_string(const HttpResponse &request, bool send_content);
-        friend HttpResponse string_to_response(const std::string &response_string);
+        friend HttpResponse stringToRespone(const std::string &response_string);
 
     private:
         HttpStatusCode status_code_;
@@ -173,8 +173,8 @@ namespace simple_http_server
     // Utility functions to convert HTTP message objects to string and vice versa
     std::string to_string(const HttpRequest &request);
     std::string to_string(const HttpResponse &response, bool send_content = true);
-    HttpRequest string_to_request(const std::string &request_string);
-    HttpResponse string_to_response(const std::string &response_string);
+    HttpRequest stringToRequest(const std::string &request_string);
+    HttpResponse stringToRespone(const std::string &response_string);
 
 } // namespace simple_http_server
 

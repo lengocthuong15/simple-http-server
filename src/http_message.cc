@@ -202,7 +202,7 @@ namespace simple_http_server
         return oss.str();
     }
 
-    HttpRequest string_to_request(const std::string &request_string)
+    HttpRequest stringToRequest(const std::string &request_string)
     {
         std::string start_line, header_lines, message_body;
         std::istringstream iss;
@@ -271,7 +271,7 @@ namespace simple_http_server
         return request;
     }
 
-    HttpResponse string_to_response(const std::string &response_string)
+    HttpResponse stringToRespone(const std::string &response_string)
     {
         throw std::logic_error("Method not implemented");
     }

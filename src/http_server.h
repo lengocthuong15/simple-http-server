@@ -74,10 +74,9 @@ namespace simple_http_server
         bool running() const { return running_; }
 
     private:
-        static constexpr int kBacklogSize = 1000;
-        static constexpr int kMaxConnections = 10000;
-        static constexpr int kMaxEvents = 10000;
-        static constexpr int kThreadPoolSize = 5;
+        static constexpr int BACK_LOG_SIZE = 5000;
+        static constexpr int MAX_EVENTS = 10000;
+        static constexpr int THREAD_POOL_SIZE = 5;
 
         std::string host_;
         std::uint16_t port_;
@@ -85,9 +84,9 @@ namespace simple_http_server
         std::atomic_bool running_;
         std::thread listener_thread_;
         std::thread storage_watcher_;
-        std::thread worker_threads_[kThreadPoolSize];
-        int worker_epoll_fd_[kThreadPoolSize];
-        epoll_event worker_events_[kThreadPoolSize][kMaxEvents];
+        std::thread worker_threads_[THREAD_POOL_SIZE];
+        int worker_epoll_fd_[THREAD_POOL_SIZE];
+        epoll_event worker_events_[THREAD_POOL_SIZE][MAX_EVENTS];
         std::map<Uri, std::map<HttpMethod, HttpRequestHandler_t>> request_handlers_;
         Storage *storage;
 

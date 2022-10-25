@@ -27,18 +27,18 @@ int main(void)
     try
     {
 
-        std::cout << "Starting the web server.." << std::endl;
+        std::cout << "Starting the server.." << std::endl;
         server.Start();
-        std::cout << "Server listening on " << host << ":" << port << std::endl;
+        std::cout << "Server is listening on " << host << ":" << port << std::endl;
 
-        std::cout << "Enter [q] to stop the server" << std::endl;
+        std::cout << "Type [q] and then enter to stop the server" << std::endl;
         std::string command;
         while (std::cin >> command, command != "q")
             ;
-        std::cout << "'q' command entered. Stopping the web server.."
+        std::cout << "'q' command entered. Stopping the server.."
                   << std::endl;
         server.Stop();
-        std::cout << "Server stopped" << std::endl;
+        std::cout << "Server has been stopped" << std::endl;
     }
     catch (std::exception &e)
     {

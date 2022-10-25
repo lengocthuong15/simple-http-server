@@ -54,7 +54,7 @@ namespace simple_http_server
             throw std::runtime_error("Failed to bind to socket");
         }
 
-        if (listen(sock_fd_, kBacklogSize) < 0)
+        if (listen(sock_fd_, BACK_LOG_SIZE) < 0)
         {
             std::ostringstream msg;
             msg << "Failed to listen on port " << port_;
@@ -65,7 +65,7 @@ namespace simple_http_server
         running_ = true;
         listener_thread_ = std::thread(&HttpServer::Listen, this);
         this->storage_watcher_ = std::thread(&HttpServer::Watch_Storage, this);
-        for (int i = 0; i < kThreadPoolSize; i++)
+        for (int i = 0; i < THREAD_POOL_SIZE; i++)
         {
             worker_threads_[i] = std::thread(&HttpServer::ProcessEvents, this, i);
         }
@@ -102,17 +102,18 @@ namespace simple_http_server
 
     void HttpServer::Stop()
     {
+        running_ = false;
+        listener_thread_.join();
+        storage_watcher_.join();
         if (storage)
         {
             delete storage;
         }
-        running_ = false;
-        listener_thread_.join();
-        for (int i = 0; i < kThreadPoolSize; i++)
+        for (int i = 0; i < THREAD_POOL_SIZE; i++)
         {
             worker_threads_[i].join();
         }
-        for (int i = 0; i < kThreadPoolSize; i++)
+        for (int i = 0; i < THREAD_POOL_SIZE; i++)
         {
             close(worker_epoll_fd_[i]);
         }
@@ -129,7 +130,7 @@ namespace simple_http_server
 
     void HttpServer::SetUpEpoll()
     {
-        for (int i = 0; i < kThreadPoolSize; i++)
+        for (int i = 0; i < THREAD_POOL_SIZE; i++)
         {
             if ((worker_epoll_fd_[i] = epoll_create1(0)) < 0)
             {
@@ -146,10 +147,12 @@ namespace simple_http_server
 
     void HttpServer::Watch_Storage()
     {
-        while (1)
+        while (running_)
         {
             sleep(5);
-            this->storage->updateResource();
+            if (storage) {
+                this->storage->updateResource();
+            }
         }
     }
 
@@ -188,7 +191,7 @@ namespace simple_http_server
                 controlEpollEvent(worker_epoll_fd_[current_worker], EPOLL_CTL_ADD,
                                     client_fd, EPOLLIN, client_data);
                 current_worker++;
-                if (current_worker == HttpServer::kThreadPoolSize)
+                if (current_worker == HttpServer::THREAD_POOL_SIZE)
                     current_worker = 0;
             }
         }
@@ -201,7 +204,7 @@ namespace simple_http_server
         while (running_)
         {
             int nfds = epoll_wait(worker_epoll_fd_[worker_id],
-                                  worker_events_[worker_id], HttpServer::kMaxEvents, 5);
+                                  worker_events_[worker_id], HttpServer::MAX_EVENTS, 5);
             if (nfds < 0)
             {
                 continue;
@@ -318,7 +321,7 @@ namespace simple_http_server
 
         try
         {
-            http_request = string_to_request(request_string);
+            http_request = stringToRequest(request_string);
             http_response = HandleHttpRequest(http_request);
         }
         catch (const std::invalid_argument &e)
