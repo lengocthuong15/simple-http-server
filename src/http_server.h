@@ -25,7 +25,8 @@ namespace simple_http_server
 
     // Maximum size of an HTTP message is limited by how much bytes
     // we can read or send via socket each time
-    constexpr size_t kMaxBufferSize = 65104;
+    // constexpr size_t kMaxBufferSize = 65104;
+    constexpr size_t kMaxBufferSize = 4096;
 
     struct EventData
     {
@@ -33,7 +34,14 @@ namespace simple_http_server
         int fd;
         size_t length;
         size_t cursor;
-        char buffer[kMaxBufferSize];
+        std::string buffer;
+        // char buffer[kMaxBufferSize];
+        // char* buffer = new char[kMaxBufferSize];
+        // ~EventData() {
+        //     if (buffer) {
+        //         delete[] buffer;
+        //     }
+        // }
     };
 
     // A request handler should expect a request as argument and returns a response

@@ -249,7 +249,9 @@ namespace simple_http_server
         if (events == EPOLLIN)
         {
             request = data;
-            ssize_t byte_count = recv(fd, request->buffer, kMaxBufferSize, 0);
+            char buffer[kMaxBufferSize];
+            ssize_t byte_count = recv(fd, buffer, kMaxBufferSize, 0);
+            request->buffer = buffer;
             if (byte_count > 0)
             { // we have fully received the message
                 response = new EventData();
@@ -282,8 +284,10 @@ namespace simple_http_server
         else
         {
             response = data;
+            // auto len = response->buffer.length();
+            // char* buffer = new char[len];
             ssize_t byte_count =
-                send(fd, response->buffer + response->cursor, response->length, 0);
+                send(fd, response->buffer.c_str() + response->cursor, response->length, 0);
             if (byte_count >= 0)
             {
                 if (byte_count < response->length)
@@ -347,10 +351,11 @@ namespace simple_http_server
         // Set response to write to client
         response_string =
             to_string(http_response, http_request.method() != HttpMethod::HEAD);
-        ulong rpLen = response_string.length();
-        ulong cpLen = rpLen > kMaxBufferSize ? kMaxBufferSize : rpLen;
-        memcpy(raw_response->buffer, response_string.c_str(), cpLen);
-        raw_response->length = cpLen;
+        std::size_t rpLen = response_string.length();
+        // std::size_t  cpLen = rpLen > kMaxBufferSize ? kMaxBufferSize : rpLen;
+        // memcpy(raw_response->buffer, response_string.c_str(), rpLen);
+        raw_response->buffer = response_string;
+        raw_response->length = rpLen;
     }
 
     HttpResponse HttpServer::HandleHttpRequest(const HttpRequest &request)
