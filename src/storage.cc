@@ -51,6 +51,7 @@ void Storage::updateResource()
             this->resources.erase(filePath);
             this->resources.emplace(filePath, content);
             // std::cout << "Add new resource, filepath = " << filePath << std::endl;
+            // std::cout << "Add new resource, content = " << content << std::endl;
         }
     }
 }
@@ -62,7 +63,7 @@ bool Storage::getResource(const std::string &filePath, std::string &outStr)
         auto it = this->resources.find(filePath);
         if (it != this->resources.end())
         {
-            outStr = it->second;
+            outStr.assign(it->second);
             return true;
         }
         return false;

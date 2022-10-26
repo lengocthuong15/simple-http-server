@@ -30,7 +30,7 @@ namespace simple_http_server
           worker_epoll_fd_()
     {
         CreateSocket();
-        storage = new Storage({"/index.html"});
+        storage = new Storage({"/index.html", "/overview.png"});
     }
 
     void HttpServer::Start()
@@ -88,8 +88,20 @@ namespace simple_http_server
             return response;
         };
 
+        auto send_image = [](const HttpRequest &request, Storage *inStorage) -> HttpResponse
+        {
+            HttpResponse response(HttpStatusCode::Ok);
+            std::string path = request.uri().path();
+            std::string content;
+            inStorage->getResource(path, content);
+            response.SetHeader("Content-Type", "image/png");
+            response.SetContent(content);
+            return response;
+        };
+
         this->RegisterHttpRequestHandler("/", HttpMethod::GET, say_hello);
         this->RegisterHttpRequestHandler("/index.html", HttpMethod::GET, send_html);
+        this->RegisterHttpRequestHandler("/overview.png", HttpMethod::GET, send_image);
     }
 
     void HttpServer::Stop()
@@ -335,8 +347,10 @@ namespace simple_http_server
         // Set response to write to client
         response_string =
             to_string(http_response, http_request.method() != HttpMethod::HEAD);
-        memcpy(raw_response->buffer, response_string.c_str(), response_string.length());
-        raw_response->length = response_string.length();
+        ulong rpLen = response_string.length();
+        ulong cpLen = rpLen > kMaxBufferSize ? kMaxBufferSize : rpLen;
+        memcpy(raw_response->buffer, response_string.c_str(), cpLen);
+        raw_response->length = cpLen;
     }
 
     HttpResponse HttpServer::HandleHttpRequest(const HttpRequest &request)
