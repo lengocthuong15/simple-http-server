@@ -82,21 +82,13 @@ namespace simple_http_server
             HttpResponse response(HttpStatusCode::Ok);
             std::string path = request.uri().path();
             std::string content;
-            // std::cout << "File path = " << path << std::endl;
             inStorage->getResource(path, content);
-            // content += "<!doctype html>\n";
-            // content += "<html>\n<body>\n\n";
-            // content += "<h1>Hello, world in an Html page</h1>\n";
-            // content += "<p>A Paragraph</p>\n\n";
-            // content += "</body>\n</html>\n";
-
             response.SetHeader("Content-Type", "text/html");
             response.SetContent(content);
             return response;
         };
 
-        // this->RegisterHttpRequestHandler("/", HttpMethod::GET, say_hello);
-        // this->RegisterHttpRequestHandler("/hello.html", HttpMethod::GET, send_html);
+        this->RegisterHttpRequestHandler("/", HttpMethod::GET, say_hello);
         this->RegisterHttpRequestHandler("/index.html", HttpMethod::GET, send_html);
     }
 
@@ -350,14 +342,20 @@ namespace simple_http_server
     HttpResponse HttpServer::HandleHttpRequest(const HttpRequest &request)
     {
         auto it = request_handlers_.find(request.uri());
-        if (it == request_handlers_.end())
-        { // this uri is not registered
-            return HttpResponse(HttpStatusCode::NotFound);
+        if (it == request_handlers_.end()) // this uri is not registered
+        {
+            HttpResponse response(HttpStatusCode::NotFound);
+            response.SetHeader("Content-Type", "text/plain");
+            response.SetContent("NOT FOUND\n");
+            return response;
         }
         auto callback_it = it->second.find(request.method());
         if (callback_it == it->second.end())
         { // no handler for this method
-            return HttpResponse(HttpStatusCode::MethodNotAllowed);
+            HttpResponse response(HttpStatusCode::MethodNotAllowed);
+            response.SetHeader("Content-Type", "text/plain");
+            response.SetContent("NOT ALLOWED\n");
+            return response;
         }
         return callback_it->second(request, this->storage); // call handler to process the request
     }
