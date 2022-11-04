@@ -1,4 +1,9 @@
+
+```
+Forked and ref from: https://github.com/trungams/http-server
+```
 **How to use**
+
 I already built the project to the folder `out`
 ```
 ➜  out git:(master) ✗ tree.
@@ -94,6 +99,4 @@ Future feature and Enhancement
 *   Add Logger: Logger is a critical feature for a SW, especially for a web server.
 *   Support Multipart data
 *   Bandwidth throttling or API rate limit
-
-%
  
