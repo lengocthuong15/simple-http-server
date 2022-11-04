@@ -30,7 +30,7 @@ namespace simple_http_server
           worker_epoll_fd_()
     {
         CreateSocket();
-        storage = new Storage({"/index.html", "/overview.png"});
+        storage = new Storage({"/index.html", "/overview.png", "/local_file.png", "/local_ram.png", "/cpu_idle.png", "/cpu_loading.png"});
     }
 
     void HttpServer::Start()
@@ -102,6 +102,10 @@ namespace simple_http_server
         this->RegisterHttpRequestHandler("/", HttpMethod::GET, say_hello);
         this->RegisterHttpRequestHandler("/index.html", HttpMethod::GET, send_html);
         this->RegisterHttpRequestHandler("/overview.png", HttpMethod::GET, send_image);
+        this->RegisterHttpRequestHandler("/local_file.png", HttpMethod::GET, send_image);
+        this->RegisterHttpRequestHandler("/local_ram.png", HttpMethod::GET, send_image);
+        this->RegisterHttpRequestHandler("/cpu_idle.png", HttpMethod::GET, send_image);
+        this->RegisterHttpRequestHandler("/cpu_loading.png", HttpMethod::GET, send_image);
     }
 
     void HttpServer::Stop()

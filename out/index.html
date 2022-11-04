@@ -21,22 +21,59 @@
 	<li>The purpose of Storage and Storage_Watcher is to reduce the CPU process when dealing with local files. We will
 		provide the content as quick as possible and we also the content is updated</li>
 	<li>Some utility functions parse HTTP requests and responses</li>
-	<img src="out/overview.PNG" />
+	<img src="./overview.png" />
 </ul>
 
 <h2>Benchmark</h2>
-
+I using this tool for checking the perf: https://github.com/wg/wrk
 <blockquote style="background: #dbdbdb;
-width: 300px;
+width: 400px;
 border-radius: 5px;
 padding: 10px;">
 	<ul>
-		<li>Model: DELL</li>
-		<li>OS: Ubuntu 20.04 TLS x84_64</li>
-		<li>Kernel: 4.18.0-24-generic</li>
-		<li>CPU: Intel i7-8600 (8) @ 4.000 GHz</li>
+		<li>OS: Ubuntu 20.04 LTS</li>
+		<li>CPU: Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz</li>
 		<li>Memory: 8GB</li>
 	</ul>
+</blockquote>
+<blockquote style="background: #dbdbdb;
+width: 600px;
+border-radius: 5px;
+padding: 10px;">
+<p><b>Testing with the resource in RAM (local variable)</b></p>
+	<ul>
+		<li>URL: http://127.0.0.1:8080/</li>
+		<li>Time: 60s</li>
+	</ul>	
+	<img src="./local_ram.png" />
+</blockquote>
+
+<blockquote style="background: #dbdbdb;
+width: 650px;
+border-radius: 5px;
+padding: 10px;">
+<p><b>Testing with the resource in local files (which are cached in Storage)</b></p>
+	<ul>
+		<li>URL: http://127.0.0.1:8080/index.html</li>
+		<li>Time: 60s</li>
+	</ul>	
+	<img src="./local_file.png" />
+</blockquote>
+
+<blockquote style="background: #dbdbdb;
+width: 600px;
+border-radius: 5px;
+padding: 10px;">
+<p><b>CPU when IDLE</b></p>
+	<img src="./cpu_idle.png" />
+</blockquote>
+
+<blockquote style="background: #dbdbdb;
+width: 600px;
+border-radius: 5px;
+padding: 10px;">
+<p><b>CPU when Loading</b></p>
+	<img src="./cpu_loading.png" />
 </blockquote>
 
 <h2>Future feature and Enhancement</h2>
